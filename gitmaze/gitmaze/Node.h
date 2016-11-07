@@ -19,6 +19,7 @@ public:
 
 	bool visited = false;
 	bool inlist = false;
+	bool inpath = false;
 
 	Node(int, int, int, int);
 

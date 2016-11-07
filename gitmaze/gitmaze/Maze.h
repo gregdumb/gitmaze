@@ -10,6 +10,7 @@ public:
 	Node * getBase();
 
 	void printMaze();
+	void printSolution();
 
 	Maze(int mazeRowWidth);
 
@@ -27,6 +28,7 @@ private:
 	void randomizeDoors();
 	void prims();
 	void recursivePrims(Node * n, Node * p, std::vector<Node *> & v);
+	bool recursiveSolution(Node * n);
 
 	bool joinNodes(Node * n1, Node * n2);
 
@@ -258,36 +260,6 @@ void Maze::recursivePrims(Node * n, Node * p, std::vector<Node *> & v)
 
 		recursivePrims(next, nullptr, v);
 	}
-
-	/*if (n->visited)
-		return;
-
-	printMaze();
-	system("cls");
-
-	// "Visit" the current node
-	n->visited = true;
-
-	if (p != nullptr && p != n)
-	{
-		joinNodes(n, p);
-	}
-
-	// Make a vector of the surrounding nodes
-	std::vector<Node *> surrounding;
-	for (int i = 0; i < 4; i++)
-	{
-		if (n->link[i] != nullptr && !n->link[i]->visited)
-		{
-			surrounding.push_back(n->link[i]);
-		}
-	}
-
-	std::random_shuffle(surrounding.begin(), surrounding.end());
-	for (int i = 0; i < surrounding.size(); i++)
-	{
-		recursivePrims(surrounding[i], n);
-	}*/
 }
 
 void Maze::randomizeDoors()
@@ -308,15 +280,6 @@ void Maze::randomizeDoors()
 		leftmost = leftmost->getDown();
 		current = leftmost;
 	}
-
-	/*std::vector<Node *> randVect = mazeVect;
-
-	std::random_shuffle(randVect.begin(), randVect.end());
-
-	for (int i = 0; i < randVect.size(); i++)
-	{
-		Node * n = randVect[i];
-	}*/
 }
 
 void Maze::printMaze()
@@ -396,35 +359,65 @@ bool Maze::joinNodes(Node * n1, Node * n2)
 		}
 	}
 
-	/*if (n1->getUp() == n2)
-	{
-		n1->upDoor = 0;
-		n2->downDoor = 0;
-	}
-	else if (n1->getDown() == n2)
-	{
-		n1->downDoor = 0;
-		n2->upDoor = 0;
-	}
-	else if (n1->getLeft() == n2)
-	{
-		n1->leftDoor = 0;
-		n2->rightDoor = 0;
-	}
-	else if (n1->getRight ()== n2)
-	{
-		n1->rightDoor = 0;
-		n2->leftDoor = 0;
-	}
-	else
-	{
-		return false;
-	}*/
-
 	return true;
 }
 
 Node * Maze::findRandomNeighbor(bool unvisited = true)
 {
 	return nullptr;
+}
+
+void Maze::printSolution()
+{
+	recursiveSolution(base);
+
+	Node * current = base;
+	Node * leftmost = base;
+
+	// Now iterate through whole thing
+	while (leftmost != nullptr)
+	{
+		// Iterate through current line
+		while (current != nullptr)
+		{
+			if (current->inpath)
+				std::cout << "#";
+			else
+				std::cout << " ";
+
+			if (current->getRight() == nullptr)
+				std::cout << std::endl;
+
+			current = current->getRight();
+		}
+		leftmost = leftmost->getDown();
+		current = leftmost;
+	}
+}
+
+bool Maze::recursiveSolution(Node * n)
+{
+	n->visited = true;
+
+	// If we are at the bottom left corner
+	if (n->getRight() == nullptr && n->getDown() == nullptr)
+	{
+		n->inpath = true;
+		return true;
+	}
+	else
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (n->link[i] != nullptr && !n->link[i]->visited)
+			{
+				bool result = recursiveSolution(n->link[i]);
+				if (result)
+					n->inpath = true;
+				return result;
+			}
+		}
+	}
+
+	return false;
 }
